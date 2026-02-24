@@ -33,7 +33,7 @@
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/yourusername/MAIN_DIAGNOSTICL2
+git clone https://github.com/viMdi/MAIN_DIAGNOSTICL2
 cd MAIN_DIAGNOSTICL2
 
 # Создать виртуальное окружение
