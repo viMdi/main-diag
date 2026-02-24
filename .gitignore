@@ -1,0 +1,12 @@
+cfg.py
+__pycache__/
+*.py[cod]
+*$py.class
+myvenv/
+venv/
+env/
+.env
+*.log
+*.bak
+*.swp
+*.swo
