@@ -1,4 +1,4 @@
-# D-Link L2 Switch Port Diagnostics and check ARP Verification on L3 gateway
+# D-Link L2 Switch Port Diagnostics and check ARP Entry on L3 gateway
 
 Скрипт для автоматической диагностики портов на коммутаторах D-Link L2(DGS-1210, 3028, 3000-24TC, 3120-24TC, 3200-24). Позволяет быстро проверить состояние порта юзера, не заходя вручную на оборудование.
 
