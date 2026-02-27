@@ -274,7 +274,9 @@ class DLinkTelnetClient:
             # ищем трафик на порту
             res_packet_ports = re.search(r"RX Bytes.*?\d+\s+(\d+)", packet_ports)
             if res_packet_ports:
-                print(f"  PACKETS PORT: {round(int(res_packet_ports.group(1))*8/1000000, 2)} Mbs")
+                print(
+                    f"  PACKETS PORT: {round(int(res_packet_ports.group(1)) * 8 / 1000000, 2)} Mbs"
+                )
             else:
                 print("  PACKETS PORT: не определен")
 
@@ -297,7 +299,7 @@ class DLinkTelnetClient:
             self.session.sendline(cmd)
             time.sleep(1)
             self.session.sendline("")
-            self.session.expect(["5#", "admin#"], timeout=2)
+            self.session.expect(["5#", "admin#"], timeout=1)
             cab_diag = self.session.before.decode("utf-8", errors="ignore")
 
             cab_diag_port = re.search(
@@ -323,13 +325,24 @@ class DLinkTelnetClient:
             self.session.expect(["5#", "admin#"], timeout=1)
             data_vlan = self.session.before.decode("utf-8", errors="ignore")
 
-            # порядок колонок: ID, Untagged, Tagged, Forbidden, Dynamic
-            # первые три: ID, Untagged, Tagged
-            re_re = re.findall(r"^\s+(\d+)\s+([X-])\s+([X-])", data_vlan, re.MULTILINE)
+            # ВРЕМЕННО: посмотрим что приходит
+            # print("\n  DEBUG - VLAN DATA:")
+            # print(data_vlan)
+            # print("  END DEBUG\n")
 
-            if re_re:
-                for vlan_id, untagged_col, tagged_col in re_re:
-                    # определяем в каком состоянии порт для этого VLAN
+            # универсальная регулярка под разные свитчи
+            vlan_matches = re.findall(
+                r"^\s*(\d+)\s+([X-])\s+([X-])", data_vlan, re.MULTILINE
+            )
+
+            # если не зарегало по универсальной, то пробуем второй (с номером порта в начале строки)
+            if not vlan_matches:
+                vlan_matches = re.findall(
+                    r"^\s*\d+\s+(\d+)\s+([X-])\s+([X-])", data_vlan, re.MULTILINE
+                )
+
+            if vlan_matches:
+                for vlan_id, untagged_col, tagged_col in vlan_matches:
                     if untagged_col == "X" and tagged_col == "-":
                         print(f"  VLAN {vlan_id}: Untagged")
                     elif untagged_col == "-" and tagged_col == "X":
