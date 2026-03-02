@@ -339,6 +339,7 @@ class DLinkTelnetClient:
 
             if cab_diag_port:
                 result = cab_diag_port.group(1)
+                result = re.sub(r'\s+', ' ', result)
                 print(f"  CABLE DIAG: {result}")
             else:
                 print("  CABLE DIAG: информация не найдена")
