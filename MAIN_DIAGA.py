@@ -47,14 +47,14 @@ class DatabaseClient:
         # добавить запрос из бд по ип свитча и вывод его имя
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT port, switch, IP, gate, Add_IP, dhcp_type FROM users WHERE number = %s"
+                sql = "SELECT PortP, switch, IP, gate, Add_IP, dhcp_type FROM users WHERE number = %s"
                 cursor.execute(sql, (number,))
                 rows = cursor.fetchall()
 
                 for row in rows:
                     user_data = {
                         "switch_name": None,  # сюда потом запишем имя свитча
-                        "port": row.get("port") or "",
+                        "port": row.get("PortP") or "",
                         "switch": row.get("switch") or "",
                         "ip": row.get("IP") or "",
                         "gate": row.get("gate") or "",
