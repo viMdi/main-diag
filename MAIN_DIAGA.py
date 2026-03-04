@@ -254,15 +254,15 @@ class DLinkTelnetClient:
 
                 # пробуем первую команду
                 gw.session.sendline(f"show arpentry ipaddress {user_ip}")
-                time.sleep(1)
-                gw.session.expect(["5#", "admin#", "Switch#", "#"], timeout=3)
+                time.sleep(0.5)
+                gw.session.expect(["5#", "admin#", "Switch#", "#"], timeout=1)
                 arp_data = gw.session.before.decode("utf-8", errors="ignore")
 
                 # если не сработало, пробуем вторую
                 if "Invalid" in arp_data or "^" in arp_data or not arp_data.strip():
                     gw.session.sendline(f"sh arp {user_ip}")
-                    time.sleep(1)
-                    gw.session.expect(["5#", "admin#", "Switch#", "#"], timeout=3)
+                    time.sleep(0.5)
+                    gw.session.expect(["5#", "admin#", "Switch#", "#"], timeout=1)
                     arp_data = gw.session.before.decode("utf-8", errors="ignore")
 
                 # ищем MAC и проверяем IP
