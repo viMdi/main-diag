@@ -1,76 +1,94 @@
 #!/usr/bin/python3
 import sys
 import pexpect
+import re
+import time
 from MAIN_DIAGA import DatabaseClient, DLinkTelnetClient
 import cfg
-import time
+
 
 class InteractiveDLink(DLinkTelnetClient):
     def connect_interactive(self):
         """подключение без отключения clipaging"""
         try:
-            print(f"Connect to {self.host}...")
-            self.session = pexpect.spawn(f"telnet {self.host}", timeout=6)
+            self.session = pexpect.spawn(f"telnet {self.host}", timeout=2)
             self.session.expect(r"User[Nn]ame:")
             self.session.sendline(self.username)
             self.session.expect(r"[Pp]ass[Ww]ord")
             self.session.sendline(self.password)
-            self.session.expect(["5#", "admin#", "#", ">", "Switch#"], timeout=1)
-            print("SUCCESSFUL")
+            self.session.expect(["5#", "admin#", "#", ">", "Switch#"], timeout=2)
             self.connected = True
             return True
-        except Exception:
-            print(f"Свитч упал: {self.host}")
+        except:
             return False
+
+
+def monitor_packets_live(switch, port):
+    """мониторинг пакетов в реальном времени"""
+    switch.session.sendline(f"show packet ports {port}")
+    time.sleep(1)
+
+    try:
+        while True:
+            time.sleep(2)
+            try:
+                data = switch.session.read_nonblocking(size=10000, timeout=1).decode(
+                    errors="ignore"
+                )
+                matches = re.findall(
+                    r"(?:RX|TX) Bytes.*?\d+\s+(\d+)", data, re.IGNORECASE
+                )
+                rx_bytes = int(matches[0]) if matches else 0
+                tx_bytes = int(matches[1]) if len(matches) > 1 else 0
+
+                rx_mbps = round(rx_bytes * 8 / 1000000, 1)
+                tx_mbps = round(tx_bytes * 8 / 1000000, 1)
+
+                print(
+                    f"\rRX: {rx_bytes} bytes ({rx_mbps} Mbs) | TX: {tx_bytes} bytes ({tx_mbps} Mbs)   ",
+                    end="",
+                    flush=True,
+                )
+            except:
+                continue
+    except KeyboardInterrupt:
+        print("\n")
+        switch.session.sendcontrol("c")
+        time.sleep(0.5)
+        switch.session.sendline("")
+        return
+
 
 def main():
     db = DatabaseClient(cfg.DB_CONFIG)
     if not db.connect():
-        print("Ошибка подключения к БД")
+        print("Error DB")
         sys.exit(1)
 
     try:
-        search = input("NOMBER CHILEN: ").strip()
-        users = db.get_user_by_number(search)
+        while True:
+            search = input("\nUs_num: ").strip()
 
-        if not users:
-            print("Абонент не найден")
-            return
+            if search.lower() in ["exit", "quit", "q", "выход"]:
+                break
 
-        for idx, user in enumerate(users, 1):
-            print(f"INFO #{idx}: {user['switch']} | порт {user['port']}")
+            users = db.get_user_by_number(search)
+            if not users:
+                print("Not found")
+                continue
 
-        if len(users) == 1:
             user = users[0]
-            switch_ip = user["switch"]
-            port = user["port"]
-
-            switch = InteractiveDLink(switch_ip)
+            switch = InteractiveDLink(user["switch"])
             if switch.connect_interactive():
-                print("\nИнтерактивный режим. Введите 'exit' для выхода.\n")
-
-                while True:
-                    cmd = input(f"{switch_ip}> ").strip()
-                    if cmd.lower() == 'exit':
-                        break
-
-                    switch.session.sendline(cmd)
-                    time.sleep(1)
-                    switch.session.sendline("")
-
-                    try:
-                        switch.session.expect(["5#", "admin#", "#", "Switch#"], timeout=2)
-                        output = switch.session.before.decode(errors="ignore")
-                        print(output)
-                    except:
-                        print("Timeout")
-
-                switch.disconnect()
+                monitor_packets_live(switch, user["port"])
+            else:
+                print("Error connect")
 
     except KeyboardInterrupt:
-        print("\nВыход")
+        print("\n")
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     main()
