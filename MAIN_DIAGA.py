@@ -166,7 +166,7 @@ class DLinkTelnetClient:
 			if res:
 				print(f"  LINK STATUS: {res.group()}")
 			else:
-				print("  LINK STATUS: не определен")
+				print("  LINK STATUS: not defined")
 
 		except Exception as e:
 			print(f"  Ошибка при проверке порта: {e}")
@@ -197,13 +197,13 @@ class DLinkTelnetClient:
 
 				# ищем тип порта на порт секурити (Dynamic или Permanent)
 				type_match = re.search(r"(Dynamic|Permanent)", data_fdb, re.IGNORECASE)
-				mac_type = type_match.group(1) if type_match else "не определен"
+				mac_type = type_match.group(1) if type_match else "no result"
 
 				print(f"  MAC: {', '.join(mac_list)}")
 				print(f"  PORT_SECURITY: {mac_type}")
 				return mac_list
 			else:
-				print("  MAC: не найден")
+				print("  MAC: not found")
 				return []
 		except Exception as e:
 			print(f"  Ошибка при поиске MAC-адресов: {e}")
@@ -227,7 +227,7 @@ class DLinkTelnetClient:
 			if res_dhcp:
 				print(f"  DHCP_RELAY: {res_dhcp.group(1)}")
 			else:
-				print("  DHCP_RELAY: не определен")
+				print("  DHCP_RELAY: not defined")
 
 		except Exception as e:
 			print(f"  Ошибка при проверке dhcp: {e}")
@@ -259,7 +259,7 @@ class DLinkTelnetClient:
 				self.gateway_ip = res_def_gate.group(1)
 				print(f"  DEF_GATEWEY: {res_def_gate.group(1)}")
 			else:
-				print("  DEF_GATEWAY: не определен")
+				print("  DEF_GATEWAY: not defined")
 
 		except Exception as e:
 			print(f"  Ошибка при проверке default_gateway: {e}")
@@ -324,7 +324,7 @@ class DLinkTelnetClient:
 					if gateway_match:
 						new_gateway = gateway_match.group(1)
 						print(
-							f"  ARP: найден шлюз {new_gateway}, пробуем подключиться..."
+							f"  ARP: gateway found {new_gateway}, trying to connect..."
 						)
 
 						# закрываем текущее соединение
@@ -389,24 +389,24 @@ class DLinkTelnetClient:
 
 							# выводим результат
 							if not mac_from_l2:
-								print("  ARP: отсутствует (нет MAC на L2)")
+								print("  ARP: no result (no MAC on L2)")
 							elif not new_ip_found:
-								print("  ARP: отсутствует (IP не найден на доп. шлюзе)")
+								print("  ARP: no result (IP not found on secondary gateway)")
 							elif (
 								new_arp_mac
 								and new_arp_mac in mac_from_l2
 								and new_ip_found
 							):
 								print(
-									"  ARP: OK (IP и MAC совпадают) - найдено на доп. шлюзе"
+									"  ARP: OK (IP and MAC match) - found on secondary gateway"
 								)
 							elif new_arp_mac:
 								print(
-									f"  ARP: НЕ СООТВЕТСТВУЕТ (L2: {', '.join(mac_from_l2)} | L3: {new_arp_mac}) - на доп. шлюзе"
+									f"  ARP: NOT MATCH (L2: {', '.join(mac_from_l2)} | L3: {new_arp_mac}) - on secondary gateway"
 								)
 							else:
 								print(
-									"  ARP: отсутствует (запись не найдена) - на доп. шлюзе"
+									"  ARP: no result (arpentry not found) - on secondary gateway"
 								)
 
 							# закрываем соединение с новым шлюзом
@@ -419,33 +419,33 @@ class DLinkTelnetClient:
 							return
 						else:
 							print(
-								f"  ARP: не удалось подключиться к шлюзу {new_gateway}"
+								f"  ARP: failed to connect to the gateway {new_gateway}"
 							)
 					else:
-						print("  ARP: маршрут не найден")
+						print("  ARP: route not found")
 
 				# если ара найдена на первом шлюзе, выводим результат
 				elif not mac_from_l2:
-					print("  ARP: отсутствует (нет MAC на L2)")
+					print("  ARP: no result (no MAC on L2)")
 
 				elif not ip_found:
-					print("  ARP: отсутствует (IP не найден на L3)")
+					print("  ARP: no result (IP not found on L3)")
 
 				elif len(mac_from_l2) > 5:
 					print(
-						f"  ARP: {arp_mac if arp_mac else 'MAC не найден'} (на порту {len(mac_from_l2)} MAC-адресов, проверьте порт вручную)"
+						f"  ARP: {arp_mac if arp_mac else 'MAC not found'} (on port {len(mac_from_l2)} MAC-address, check the port manually)"
 					)
 
 				elif arp_mac and arp_mac in mac_from_l2 and ip_found:
-					print("  ARP: OK (IP и MAC совпадают)")
+					print("  ARP: OK (IP and MAC match)")
 
 				elif arp_mac:
 					print(
-						f"  ARP: НЕ СООТВЕТСТВУЕТ (L2: {', '.join(mac_from_l2)} | L3: {arp_mac})"
+						f"  ARP: NOT MATCH (L2: {', '.join(mac_from_l2)} | L3: {arp_mac})"
 					)
 
 				else:
-					print("  ARP: отсутствует (запись не найдена)")
+					print("  ARP: no result (arpentry not found)")
 
 				# закрываем соединение с первым шлюзом
 				try:
@@ -474,7 +474,7 @@ class DLinkTelnetClient:
 			if res_util_cpu:
 				print(f"  UTIL_CPU: {res_util_cpu.group(1)}")
 			else:
-				print("  UTIL_CPU: не определен")
+				print("  UTIL_CPU: not defined")
 
 		except Exception as e:
 			print(f"  Ошибка при проверке utilization_cpu: {e}")
@@ -496,10 +496,56 @@ class DLinkTelnetClient:
 			if res_error_ports:
 				print(f"  ERRORS PORT: {res_error_ports.group(1)}")
 			else:
-				print("  ERRORS PORT: не определен")
-
+				print("  ERRORS PORT: not defined")
 		except Exception as e:
 			print(f"  Ошибка при проверке error: {e}")
+
+	def check_len_log(self, port):
+			"""проверка на кол-во падения линка в логах"""
+			try:
+					# включаем clipaging (чтобы был постраничный вывод)
+					self.session.sendline("enable clipaging")
+					self.session.expect(["5#", "admin#"], timeout=1)
+
+					# очищаем буфер
+					self.session.sendline("")
+					self.session.expect(["5#", "admin#"], timeout=1)
+
+					# отправляем команду show log
+					self.session.sendline("show log")
+					self.session.sendline("n")
+
+					# ждем накопления данных
+					time.sleep(2)
+
+					# читаем что накопилось в буфере
+					try:
+							output = self.session.read_nonblocking(size=10000, timeout=2).decode(errors="ignore")
+					except:
+							output = ""
+
+					# выходим из просмотра
+					self.session.send("q")
+					time.sleep(0.5)
+					self.session.expect(["5#", "admin#"], timeout=2)
+
+					# отключаем clipaging обратно (если нужно для следующих команд)
+					self.session.sendline("disable clipaging")
+					self.session.expect(["5#", "admin#"], timeout=2)
+
+					# считаем упоминания порта
+					# port_str = re.escape(str(port))
+					pattern = r"Port\s+\d+(?::\d+)?"
+					res_log = re.findall(pattern, output, re.IGNORECASE)
+
+					if res_log:
+							count = len(res_log)
+							print(f"  LOGS: port {port} found {count} times")
+					else:
+							print(f"  LOGS: port {port} not found in logs")
+
+			except Exception as e:
+					print(f"  Ошибка при проверке show log: {e}")
 
 	def check_packet_port(self, port):
 		"""проверка трафика на порту (show packer ports)"""
@@ -560,7 +606,7 @@ class DLinkTelnetClient:
 				result = re.sub(r"\s+", " ", result)
 				print(f"  CABLE DIAG: {result}")
 			else:
-				print("  CABLE DIAG: информация не найдена")
+				print("  CABLE DIAG: no result")
 
 		except Exception as e:
 			print(f"  Ошибка при диагностике кабеля: {e}")
@@ -597,7 +643,7 @@ class DLinkTelnetClient:
 					else:
 						print(f"  VLAN {vlan_id}: Не участвует")
 			else:
-				print("  VLAN: информация не найдена")
+				print("  VLAN: no result")
 
 		except Exception as e:
 			print(f"  Ошибка при проверке VLAN: {e}")
@@ -609,10 +655,11 @@ class DLinkTelnetClient:
 			return
 
 		print(f"\n  [DIAGNOSTIC RESULT {port}]")
-		print("  " + "=" * 50)
+		print("  " + "#" * 50)
 		print()
 
 		self.check_port_status(port)
+		self.check_len_log(port)
 		mac_list = self.check_mac_addresses(port)  #  получаем MAC здесь
 		self.check_vlan_on_port(port)
 		self.check_dhcp_relay()
@@ -625,7 +672,7 @@ class DLinkTelnetClient:
 		if hasattr(self, "gateway_ip") and self.gateway_ip:
 			self.check_arp_on_gateway(user_ip, mac_list)  #  используем mac_list
 
-		print("\n  " + "=" * 50)
+		print("\n  " + "#" * 50)
 
 
 # ==================== MAIN PROG ====================
@@ -660,20 +707,20 @@ def main():
 
 	# подключаемся к БД
 	if not db.connect():
-		print("Что-то пошло не так.")
+		print("Oops, it didn't work")
 		sys.exit(1)
 
 	try:
 		while True:
 			# ввод номера
-			search = input("NOMBER CHILEN: ").strip()
+			search = input("us_num: ").strip()
 
 			if search.lower() in ["exit", "quit", "q", "выход"]:
 				print("\nExit")
 				break
 
 			if not search:
-				print("Ошибка: введите номер для поиска")
+				print("Error: enter number to search")
 				continue
 
 			print(f"\nFind user with num: {search}")
@@ -714,11 +761,11 @@ def main():
 				port = selected_user["port"]
 
 				if not switch_info:
-					print("Не указан номер члена")
+					print("user number not specified")
 					continue
 
 				if not port:
-					print("Не указан номер порта")
+					print("port number not specified")
 					continue
 
 				# проверка является ли switch_info IP адр
@@ -732,11 +779,11 @@ def main():
 					# это имя свитча, нужно запросить IP
 					print(f"\nswitch: {switch_info}")
 					switch_ip = input(
-						f"Введите IP адрес свитча {switch_info}: "
+						f"Enter IP-add {switch_info}: "
 					).strip()
 
 					if not switch_ip:
-						print("IP адрес не указан")
+						print("IP address not specified")
 						continue
 
 				# клиент для подключения к свитчу
@@ -750,12 +797,12 @@ def main():
 					# закрываем соединение
 					switch.disconnect()
 				else:
-					print("Не удалось подключиться к свитчу")
+					print("Failed to connect")
 
-			print("Try?")  # пустая строка перед следующим поиском
+			print("Let's try again?")  # пустая строка перед следующим поиском
 
 	except KeyboardInterrupt:
-		print("\n\nПрограмма прервана пользователем.")
+		print("\n\nSCRIPT STOPPED")
 	finally:
 		db.close()
 
