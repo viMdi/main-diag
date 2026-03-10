@@ -194,12 +194,19 @@ class DLinkTelnetClient:
 
 			if res_mac:
 				mac_list = [mac.upper() for mac in res_mac]
+				total = len(mac_list)
 
 				# ищем тип порта на порт секурити (Dynamic или Permanent)
 				type_match = re.search(r"(Dynamic|Permanent)", data_fdb, re.IGNORECASE)
 				mac_type = type_match.group(1) if type_match else "no result"
 
-				print(f"  MAC: {', '.join(mac_list)}")
+				# выводим первые 4 MAC, остальные в скобках
+				if total > 4:
+					first_four = mac_list[:4]
+					print(f"  MAC: {', '.join(first_four)} (+{total-4})")
+				else:
+					print(f"  MAC: {', '.join(mac_list)}")
+
 				print(f"  PORT_SECURITY: {mac_type}")
 				return mac_list
 			else:
@@ -648,7 +655,7 @@ class DLinkTelnetClient:
 		except Exception as e:
 			print(f"  Ошибка при проверке VLAN: {e}")
 
-	def run_diagnostic(self, port, user_ip=None):
+	def run_diagnostic(self, port, user_ip=None, switch_ip_from_db=None, gateway_from_db=None):
 		"""запуск диагностики порта"""
 		if not self.connected:
 			print("  NE CONNECTIT")
@@ -660,17 +667,46 @@ class DLinkTelnetClient:
 
 		self.check_port_status(port)
 		self.check_len_log(port)
-		mac_list = self.check_mac_addresses(port)  #  получаем MAC здесь
+		mac_list = self.check_mac_addresses(port)
 		self.check_vlan_on_port(port)
 		self.check_dhcp_relay()
 		self.check_errors_port(port)
 		self.check_packet_port(port)
-		self.check_gateway_l3()
+
+		# если ип свитча и гейта одинаковый, проверяем на нем арпу
+		if switch_ip_from_db and gateway_from_db and switch_ip_from_db == gateway_from_db:
+			# проверка арпы на л2
+			self.session.sendline(f"show arpentry ipaddress {user_ip}")
+			time.sleep(0.5)
+			self.session.expect(["5#", "admin#"], timeout=1)
+			arp_data = self.session.before.decode("utf-8", errors="ignore")
+
+			arp_mac = None
+			for line in arp_data.split("\n"):
+				if "show arpentry" in line or "Command:" in line:
+					continue
+				if user_ip in line:
+					mac_match = re.search(
+						r"((?:[A-F0-9]{2}[-]){5}[A-F0-9]{2})", line, re.IGNORECASE
+					)
+					if mac_match:
+						arp_mac = mac_match.group(1).upper()
+						break
+
+			if arp_mac and arp_mac in mac_list:
+				print("  ARP: OK (IP and MAC match on local switch)")
+			elif arp_mac:
+				print(f"  ARP: NOT MATCH (L2: {', '.join(mac_list)} | local ARP: {arp_mac})")
+			else:
+				print("  ARP: not found on local switch")
+		else:
+			# если ип свитча не совпадает с ип шлюза — то смотрим на л2 дефолт гейтвей и по нему чекаем арп
+			self.check_gateway_l3()
+			if hasattr(self, "gateway_ip") and self.gateway_ip:
+				self.check_arp_on_gateway(user_ip, mac_list)
+
 		self.check_utilization_cpu()
 		self.check_cable_diagnostic(port)
-
-		if hasattr(self, "gateway_ip") and self.gateway_ip:
-			self.check_arp_on_gateway(user_ip, mac_list)  #  используем mac_list
 
 		print("\n  " + "#" * 50)
 
@@ -792,7 +828,7 @@ def main():
 				# коннект
 				if switch.connect():
 					# запуск диагностики порта
-					switch.run_diagnostic(port, selected_user["ip"])
+					switch.run_diagnostic(port, selected_user["ip"], switch_ip, selected_user["gate"])
 
 					# закрываем соединение
 					switch.disconnect()
