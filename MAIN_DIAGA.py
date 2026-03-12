@@ -689,7 +689,7 @@ class DLinkTelnetClient:
 
 			output = self.session.before.decode("utf-8", errors="ignore")
 			print(f"\n  DEBUG - ВЫВОД КОМАНДЫ (первые 500 символов):")
-			print(repr(output[:10000]))
+			print(repr(output[:15000]))
 			print(f"  END DEBUG\n")
 
 			# проверяем, есть ли реальный вывод команды
@@ -703,14 +703,20 @@ class DLinkTelnetClient:
 
 			if "DES-3028" in prompt:
 				print(f"  DEBUG: обнаружен DES-3028")
-				# для 3028 - payload
-				pattern = rf"Ports\s*:\s*{port}\s*.*?Offset\s+26\s+0x([0-9A-F]+)"
-				match = re.search(pattern, output, re.DOTALL | re.IGNORECASE)
+				# для 3028 - payload (ищем в двух форматах offset)
+				pattern1 = rf"Access ID : \d+ \n\rPorts\t  : {port}.*?\n\r +26 +0x([0-9A-F]+) 0xffffffff"
+				pattern2 = rf"Access ID : \d+ \n\rPorts\t  : {port}.*?\n\r +28 +0x([0-9A-F]+) 0xffffffff"
+
+				match = re.search(pattern1, output, re.DOTALL | re.IGNORECASE)
+				if not match:
+					match = re.search(pattern2, output, re.DOTALL | re.IGNORECASE)
+
 				if match:
 					payload = match.group(1)
+					print(f"  DEBUG: найден payload: {payload}")
 
 				# source mac для 3028
-				mac_pattern = rf"Ports\s*:\s*{port}.*?Source MAC\s*:\s*((?:[0-9A-F]{{2}}[-]){{5}}[0-9A-F]{{2}})"
+				mac_pattern = rf"Ports\t  : {port}.*?Source MAC\s*\n\r-----------------\s*\n\r((?:[0-9A-F]{{2}}[-]){{5}}[0-9A-F]{{2}})"
 				mac_match = re.search(mac_pattern, output, re.DOTALL | re.IGNORECASE)
 				if mac_match:
 					source_mac = mac_match.group(1)
