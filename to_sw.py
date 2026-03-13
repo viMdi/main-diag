@@ -7,7 +7,7 @@ from telnet.client import DLinkTelnetClient
 import re
 import cfg
 
-# ==================== MAIN PROG ====================
+# ----- main 
 
 def print_header():
 	"""вывод результатов"""
