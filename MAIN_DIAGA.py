@@ -22,7 +22,6 @@ TIMEOUTS = {
 
 class DatabaseClient:
 	"""класс для работы с бд"""
-	# ... (класс без изменений, он и так ок)
 	def __init__(self, config):
 		self.config = config
 		self.connection = None
@@ -184,7 +183,7 @@ class DLinkTelnetClient:
 			self._ensure_prompt()
 
 	def check_mac_addresses(self, port):
-		"""Проверка MAC-адресов на порту (show fdb port)"""
+		"""проверка MAC-адресов на порту (show fdb port)"""
 		try:
 			if not self._ensure_prompt():
 				return []
@@ -420,7 +419,7 @@ class DLinkTelnetClient:
 			self._ensure_prompt()
 
 	def check_errors_port(self, port):
-		"""Проверка ошибок на порту (show error ports)"""
+		"""проверка ошибок на порту (show error ports)"""
 		try:
 			if not self._ensure_prompt():
 				return
