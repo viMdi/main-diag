@@ -52,40 +52,48 @@
 
 ---
 
-## Установка
+## Установка и запуск через Docker
 
+1. Клонировать репозиторий
 ```bash
-# Клонировать репозиторий
-git clone https://github.com/viMdi/MAIN_DIAGNOSTICL2
-cd MAIN_DIAGNOSTICL2
+git clone https://github.com/viMdi/main-diag.git
+cd main-diag
 
-# Создать виртуальное окружение
-python -m venv myvenv
+2. Создать файл с переменными окружения
 
-# Активировать
-# Windows:
-myvenv\Scripts\activate
-# Linux/Mac:
-source myvenv/bin/activate
+cp .env.example .env
+# Отредактировать .env, указав реальные пароли
 
-# Установить зависимости
-pip install pymysql pexpect
+3. Собрать Docker-образ для полной диагностики
 
-# Создать файл конфигурации из примера
-cp cfg_example.py cfg.py
-# Отредактировать cfg.py, указав реальные параметры подключения к БД и оборудованию
+docker build -t main-diag .
 
-Использование
-bash
+4. Запустить
 
-python to_sw.py
+docker run --rm -it --network host --env-file .env main-diag
 
-После запуска ввести номер юзера. Скрипт покажет найденные записи и предложит запустить диагностику.
-Результат — через 5–7 секунд.
+5. Быстрая проверка трафика на порту
+
+docker build -f Dockerfile.speed -t speed-check .
+docker run --rm -it --network host --env-file .env speed-check
+
+6. Создать скрипты для быстрого запуска (опционально)
+
+echo '#!/bin/bash' > run.sh
+echo 'docker run --rm -it --network host --env-file .env main-diag' >> run.sh
+chmod +x run.sh
+
+echo '#!/bin/bash' > run_speed.sh
+echo 'docker run --rm -it --network host --env-file .env speed-check' >> run_speed.sh
+chmod +x run_speed.sh
+
+Теперь можно запускать:
+
+./run.sh          # полная диагностика
+./run_speed.sh    # проверка трафика
+
 Зависимости
 
-    Python 3.6+
+    Docker
 
-    MariaDB/MySQL
-
-    Библиотеки: pymysql, pexpect (устанавливаются через requirements.txt)
+    Доступ к БД и свитчам из сети хоста
