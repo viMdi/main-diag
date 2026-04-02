@@ -3,8 +3,9 @@ import sys
 import pexpect
 import re
 import time
-from to_sw import DatabaseClient, DLinkTelnetClient
-import cfg
+from database.client import DatabaseClient 
+from telnet.client import DLinkTelnetClient
+import os
 
 
 class InteractiveDLink(DLinkTelnetClient):
@@ -69,7 +70,7 @@ def monitor_packets_live(switch, port):
 
 
 def main():
-    db = DatabaseClient(cfg.DB_CONFIG)
+    db = DatabaseClient()
     if not db.connect():
         print("Error DB")
         sys.exit(1)
