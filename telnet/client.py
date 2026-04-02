@@ -20,8 +20,8 @@ class DLinkTelnetClient:
 	def __init__(self, host, disable_paging=True):
 		self.host = host
 		self.disable_paging = disable_paging
-		self.username = os.getenv("SWITCH_USERNAME", "angel")
-		self.password = os.getenv("SWITCH_PASSWORD", "842huevgalz")
+		self.username = os.getenv("SWITCH_USERNAME")
+		self.password = os.getenv("SWITCH_PASSWORD")
 		self.session = None
 		self.connected = False
 		self.gateway_ip = None

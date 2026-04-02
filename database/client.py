@@ -8,11 +8,11 @@ class DatabaseClient:
     def __init__(self, config=None):
         if config is None:
             self.config = {
-                "host": os.getenv("DB_HOST", "10.135.132.61"),
-                "database": os.getenv("DB_NAME", "NWLINK"),
-                "user": os.getenv("DB_USER", "dgh"),
-                "password": os.getenv("DB_PASSWORD", "3xkrivolapp"),
-                "charset": os.getenv("DB_CHARSET", "cp1251"),
+                "host": os.getenv("DB_HOST"),
+                "database": os.getenv("DB_NAME"),
+                "user": os.getenv("DB_USER"),
+                "password": os.getenv("DB_PASSWORD"),
+                "charset": os.getenv("DB_CHARSET", "cp1251"),  # charset можно оставить
             }
         else:
             self.config = config
