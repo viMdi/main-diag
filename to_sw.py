@@ -3,11 +3,11 @@
 
 from database.client import DatabaseClient
 from telnet.client import DLinkTelnetClient
-# import sys
+import sys
 import re
-import cfg
+import os
 
-# ----- main 
+# ----- main
 
 def print_header():
 	"""вывод результатов"""
@@ -31,7 +31,7 @@ def print_user_info(user, idx):
 
 def main():
 	print_header()
-	db = DatabaseClient(cfg.DB_CONFIG)
+	db = DatabaseClient()
 
 	if not db.connect():
 		print("Oops, it didn't work")

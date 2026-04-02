@@ -1,0 +1,7 @@
+cfg.py
+.env
+myvenv/
+__pycache__/
+.gitignore
+.vscode/
+README.md

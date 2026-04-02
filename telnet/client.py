@@ -1,15 +1,15 @@
 import pexpect
 import time
 import re
-import cfg
+import os
 
 # Константы таймаутов (в секундах)
 TIMEOUTS = {
-	"PROMPT": 1,
+	"PROMPT": 2,
 	"COMMAND": 1,
 	"LOG": 2,
-	"ACCESS": 4,
-	"CABLE": 1,
+	"ACCESS": 8,
+	"CABLE": 2,
 	"RECOVERY": 0.5,
 }
 
@@ -20,8 +20,8 @@ class DLinkTelnetClient:
 	def __init__(self, host, disable_paging=True):
 		self.host = host
 		self.disable_paging = disable_paging
-		self.username = cfg.SWITCH_USERNAME
-		self.password = cfg.SWITCH_PASSWORD
+		self.username = os.getenv("SWITCH_USERNAME", "angel")
+		self.password = os.getenv("SWITCH_PASSWORD", "842huevgalz")
 		self.session = None
 		self.connected = False
 		self.gateway_ip = None
