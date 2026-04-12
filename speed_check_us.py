@@ -3,9 +3,13 @@ import sys
 import pexpect
 import re
 import time
-from database.client import DatabaseClient 
+
+from dotenv import load_dotenv
+load_dotenv()
+
+from database.client import DatabaseClient
 from telnet.client import DLinkTelnetClient
-import os
+
 
 
 class InteractiveDLink(DLinkTelnetClient):

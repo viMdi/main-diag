@@ -44,7 +44,7 @@ class DatabaseClient:
         results = []
         try:
             with self.connection.cursor() as cursor:
-                sql = "SELECT PortP, SwitchP, IP, gate, Add_IP, dhcp_type FROM users WHERE number = %s"
+                sql = "SELECT PortP, SwitchP, IP, gate, Add_IP, dhcp_type, Masck FROM users WHERE number = %s"
                 cursor.execute(sql, (number,))
                 rows = cursor.fetchall()
 
@@ -52,6 +52,7 @@ class DatabaseClient:
                     user_data = {
                         "switch_name": None,
                         "port": row.get("PortP") or "",
+                        "masck": row.get("Masck") or "",
                         "switch": row.get("SwitchP") or "",
                         "ip": row.get("IP") or "",
                         "gate": row.get("gate") or "",
